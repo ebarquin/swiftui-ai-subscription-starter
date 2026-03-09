@@ -16,7 +16,7 @@ User journey implemented in the app:
 
 Splash → Onboarding → Home → Generate Insight → Insight Result → Save Insight → Paywall
 
-*(Add screenshots or GIF here)*
+![DEMO](docs/demo.gif)
 
 Example placeholders:
 
