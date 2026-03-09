@@ -12,11 +12,18 @@ final class AppState: ObservableObject {
     @Published var route: AppRoute = .splash
 
     private let onboardingCompletedKey = "onboarding_completed"
-    private let splashDuration: TimeInterval = 1.0
+    private let splashDuration: TimeInterval
     private let analyticsService: AnalyticsServiceProtocol
+    private let store: KeyValueStoring
 
-    init(analyticsService: AnalyticsServiceProtocol = AppEnvironment.shared.analyticsService) {
+    init(
+        analyticsService: AnalyticsServiceProtocol = AppEnvironment.shared.analyticsService,
+        store: KeyValueStoring = UserDefaults.standard,
+        splashDuration: TimeInterval = 1.0
+    ) {
         self.analyticsService = analyticsService
+        self.store = store
+        self.splashDuration = splashDuration
         start()
     }
 
@@ -31,12 +38,12 @@ final class AppState: ObservableObject {
     }
 
     func completeOnboarding() {
-        UserDefaults.standard.set(true, forKey: onboardingCompletedKey)
+        store.set(true, forKey: onboardingCompletedKey)
         route = .home
         analyticsService.track(.onboardingCompleted, properties: nil)
     }
 
     private var isOnboardingCompleted: Bool {
-        UserDefaults.standard.bool(forKey: onboardingCompletedKey)
+        store.bool(forKey: onboardingCompletedKey)
     }
 }
