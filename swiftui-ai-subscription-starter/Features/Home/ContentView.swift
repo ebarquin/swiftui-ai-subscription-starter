@@ -8,7 +8,21 @@
 import SwiftUI
 
 struct HomeView: View {
-    @StateObject private var viewModel = HomeViewModel()
+    @StateObject private var viewModel: HomeViewModel
+    private let analyticsService: AnalyticsServiceProtocol
+    private let subscriptionService: SubscriptionServiceProtocol
+
+    init(
+        aiService: AIServiceProtocol = AppEnvironment.shared.aiService,
+        analyticsService: AnalyticsServiceProtocol = AppEnvironment.shared.analyticsService,
+        subscriptionService: SubscriptionServiceProtocol = AppEnvironment.shared.subscriptionService
+    ) {
+        self.analyticsService = analyticsService
+        self.subscriptionService = subscriptionService
+        _viewModel = StateObject(
+            wrappedValue: HomeViewModel(aiService: aiService, analyticsService: analyticsService)
+        )
+    }
 
     var body: some View {
         NavigationStack {
@@ -49,7 +63,11 @@ struct HomeView: View {
             .padding()
             .navigationTitle("Home")
             .navigationDestination(item: $viewModel.generatedInsight) { insight in
-                InsightResultView(insight: insight)
+                InsightResultView(
+                    insight: insight,
+                    subscriptionService: subscriptionService,
+                    analyticsService: analyticsService
+                )
             }
         }
     }

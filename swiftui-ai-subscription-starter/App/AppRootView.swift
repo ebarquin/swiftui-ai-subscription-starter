@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct AppRootView: View {
+    let appEnvironment: AppEnvironment
+
     @EnvironmentObject private var appState: AppState
 
     var body: some View {
@@ -13,7 +15,11 @@ struct AppRootView: View {
                     appState.completeOnboarding()
                 }
             case .home:
-                HomeView()
+                HomeView(
+                    aiService: appEnvironment.aiService,
+                    analyticsService: appEnvironment.analyticsService,
+                    subscriptionService: appEnvironment.subscriptionService
+                )
             }
         }
     }
@@ -21,7 +27,7 @@ struct AppRootView: View {
 
 struct AppRootView_Previews: PreviewProvider {
     static var previews: some View {
-        AppRootView()
+        AppRootView(appEnvironment: AppEnvironment.shared)
             .environmentObject(AppState())
     }
 }

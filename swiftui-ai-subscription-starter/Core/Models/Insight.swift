@@ -1,6 +1,6 @@
 import Foundation
 
-struct Insight: Identifiable, Hashable {
+struct Insight: Identifiable, Hashable, Codable {
     let id: UUID
     let title: String
     let summary: String

@@ -9,11 +9,20 @@ import SwiftUI
 
 @main
 struct swiftui_ai_subscription_starterApp: App {
-    @StateObject private var appState = AppState()
+    private let appEnvironment: AppEnvironment
+    @StateObject private var appState: AppState
+
+    init() {
+        let environment = AppEnvironment.shared
+        self.appEnvironment = environment
+        _appState = StateObject(
+            wrappedValue: AppState(analyticsService: environment.analyticsService)
+        )
+    }
 
     var body: some Scene {
         WindowGroup {
-            AppRootView()
+            AppRootView(appEnvironment: appEnvironment)
                 .environmentObject(appState)
         }
     }

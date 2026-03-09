@@ -13,8 +13,10 @@ final class AppState: ObservableObject {
 
     private let onboardingCompletedKey = "onboarding_completed"
     private let splashDuration: TimeInterval = 1.0
+    private let analyticsService: AnalyticsServiceProtocol
 
-    init() {
+    init(analyticsService: AnalyticsServiceProtocol = AppEnvironment.shared.analyticsService) {
+        self.analyticsService = analyticsService
         start()
     }
 
@@ -22,12 +24,16 @@ final class AppState: ObservableObject {
         Task {
             try? await Task.sleep(nanoseconds: UInt64(splashDuration * 1_000_000_000))
             route = isOnboardingCompleted ? .home : .onboarding
+            if case .onboarding = route {
+                analyticsService.track(.onboardingStarted, properties: nil)
+            }
         }
     }
 
     func completeOnboarding() {
         UserDefaults.standard.set(true, forKey: onboardingCompletedKey)
         route = .home
+        analyticsService.track(.onboardingCompleted, properties: nil)
     }
 
     private var isOnboardingCompleted: Bool {

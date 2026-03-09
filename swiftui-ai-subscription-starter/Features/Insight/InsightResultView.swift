@@ -1,22 +1,36 @@
 import SwiftUI
 
 struct InsightResultView: View {
-    let insight: Insight
+    @StateObject private var viewModel: InsightResultViewModel
+
+    init(
+        insight: Insight,
+        subscriptionService: SubscriptionServiceProtocol = AppEnvironment.shared.subscriptionService,
+        analyticsService: AnalyticsServiceProtocol = AppEnvironment.shared.analyticsService
+    ) {
+        _viewModel = StateObject(
+            wrappedValue: InsightResultViewModel(
+                insight: insight,
+                subscriptionService: subscriptionService,
+                analyticsService: analyticsService
+            )
+        )
+    }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                Text(insight.title)
+                Text(viewModel.insight.title)
                     .font(.title2.weight(.bold))
 
-                Text(insight.summary)
+                Text(viewModel.insight.summary)
                     .font(.body)
                     .foregroundStyle(.secondary)
 
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Action Items")
                         .font(.headline)
-                    ForEach(Array(insight.actionItems.prefix(3).enumerated()), id: \.offset) { index, item in
+                    ForEach(Array(viewModel.insight.actionItems.prefix(3).enumerated()), id: \.offset) { index, item in
                         HStack(alignment: .top, spacing: 8) {
                             Text("\(index + 1).")
                                 .font(.subheadline.weight(.semibold))
@@ -29,21 +43,45 @@ struct InsightResultView: View {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Tone")
                         .font(.headline)
-                    Text(insight.tone)
+                    Text(viewModel.insight.tone)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
 
-                Text(insight.disclaimer)
+                Text(viewModel.insight.disclaimer)
                     .font(.footnote)
                     .foregroundStyle(.tertiary)
                     .padding(.top, 4)
+
+                Button("Save Insight") {
+                    viewModel.saveInsight()
+                }
+                .buttonStyle(.borderedProminent)
+
+                if let saveMessage = viewModel.saveMessage {
+                    Text(saveMessage)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding()
         }
         .navigationTitle("Your Insight")
         .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: $viewModel.showPaywall) {
+            PaywallView(
+                onSubscribe: {
+                    viewModel.subscribe()
+                },
+                onRestore: {
+                    viewModel.restore()
+                },
+                onDismiss: {
+                    viewModel.showPaywall = false
+                }
+            )
+        }
     }
 }
 
